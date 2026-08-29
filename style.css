@@ -1,6 +1,6 @@
 body {
   background: #ffcbcb;
-  font-family: Arial, sans-serif;
+  font-family: ;
   text-align: center;
 }
 
@@ -61,7 +61,6 @@ button {
   margin-bottom: 0;
 }
 
-```css
 #groupGallery {
   display: grid;
   grid-template-columns: repeat(
