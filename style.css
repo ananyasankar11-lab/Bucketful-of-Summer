@@ -58,3 +58,31 @@ button {
 .photo-card p {
   margin-bottom: 0;
 }
+
+```css
+#groupGallery {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(220px, 1fr)
+  );
+  gap: 20px;
+  max-width: 900px;
+  margin: 30px auto;
+}
+
+.group-card {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.group-card h3 {
+  margin-top: 0;
+}
+
+.group-card button {
+  display: block;
+  margin: 12px auto;
+}
