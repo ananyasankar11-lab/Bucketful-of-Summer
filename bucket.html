@@ -127,7 +127,9 @@
           const image = document.createElement("img");
           image.src = photo.image_url;
           image.alt = photo.caption || "Summer photo";
-
+          image.width = 300;
+          image.height = 200;
+            
           const caption = document.createElement("p");
           caption.textContent = photo.caption || "";
 
