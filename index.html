@@ -61,13 +61,15 @@
 
       if (result.error) {
 
-        console.error(result.error);
+  console.error("CREATE GROUP ERROR:", result.error);
 
-        statusMessage.textContent =
-          "Could not load groups.";
+  document.getElementById(
+    "statusMessage"
+  ).textContent =
+    "Error: " + result.error.message;
 
-        return;
-      }
+  return;
+}
 
 
       groupGallery.innerHTML = "";
