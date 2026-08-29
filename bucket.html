@@ -1,146 +1,147 @@
+```html
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Start Your Bucket</title>
 
-    <link rel="stylesheet" href="style.css" />
+<head>
+  <title>Start Your Bucket</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  </head>
+  <link rel="stylesheet" href="style.css" />
 
-  <body>
-    <h1>Start your bucket!</h1>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 
-    <p>1. Upload your summer fun photos or your inspo pics</p>
+<body>
 
-    <input id="photoInput" type="file" accept="image/*" />
+  <h1>Start your bucket!</h1>
 
-    <input
-      id="captionInput"
-      type="text"
-      placeholder="Add a caption"
-    />
+  <p>Make a group for your summer memories 💗</p>
 
-    <button id="uploadButton">Upload Photo</button>
+  <button onclick="window.location.href='groups.html'">
+    Create a New Group
+  </button>
 
-    <p id="statusMessage"></p>
+  <h2>Your Summer Groups</h2>
 
-    <h2>Your Summer Photos</h2>
+  <div id="groupGallery"></div>
 
-    <div id="photoGallery"></div>
+  <p id="statusMessage"></p>
 
-    <script>
-      const SUPABASE_URL = "https://shazsdptrpegwihwqvif.supabase.co";
-      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYXpzZHB0cnBlZ3dpaHdxdmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMTg5NDQsImV4cCI6MjEwMzU5NDk0NH0.lpsslUxI-cb19MTU4fhh0E3AhictEX7RpY-RgQLH1NQ";
 
-      const supabaseClient = supabase.createClient(
+  <script>
+
+    const SUPABASE_URL =
+      "https://shazsdptrpegwihwqvif.supabase.co";
+
+    const SUPABASE_ANON_KEY =
+      "YOUR_EXISTING_SUPABASE_ANON_KEY";
+
+    const supabaseClient =
+      supabase.createClient(
         SUPABASE_URL,
         SUPABASE_ANON_KEY
       );
 
-      const photoInput = document.getElementById("photoInput");
-      const captionInput = document.getElementById("captionInput");
-      const uploadButton = document.getElementById("uploadButton");
-      const statusMessage = document.getElementById("statusMessage");
-      const photoGallery = document.getElementById("photoGallery");
 
-      uploadButton.addEventListener("click", uploadPhoto);
+    const groupGallery =
+      document.getElementById("groupGallery");
 
-      async function uploadPhoto() {
-        const file = photoInput.files[0];
-        const caption = captionInput.value;
+    const statusMessage =
+      document.getElementById("statusMessage");
 
-        if (!file) {
-          statusMessage.textContent = "Please choose a photo first.";
-          return;
-        }
 
-        if (!file.type.startsWith("image/")) {
-          statusMessage.textContent = "Please choose an image file.";
-          return;
-        }
+    async function loadGroups() {
 
-        statusMessage.textContent = "Uploading photo...";
-
-        const fileExtension = file.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${fileExtension}`;
-        const filePath = `summer/${fileName}`;
-
-        const uploadResult = await supabaseClient.storage
-          .from("summer-photos")
-          .upload(filePath, file, {
-            contentType: file.type,
-            upsert: false
-          });
-
-        if (uploadResult.error) {
-          console.error(uploadResult.error);
-          statusMessage.textContent = "Photo upload failed.";
-          return;
-        }
-
-        const urlResult = supabaseClient.storage
-          .from("summer-photos")
-          .getPublicUrl(filePath);
-
-        const imageUrl = urlResult.data.publicUrl;
-
-        const insertResult = await supabaseClient
-          .from("bucket_photos")
-          .insert({
-            image_url: imageUrl,
-            storage_path: filePath,
-            caption: caption
-          });
-
-        if (insertResult.error) {
-          console.error(insertResult.error);
-          statusMessage.textContent = "Photo uploaded, but saving failed.";
-          return;
-        }
-
-        photoInput.value = "";
-        captionInput.value = "";
-        statusMessage.textContent = "Photo uploaded!";
-
-        loadPhotos();
-      }
-
-      async function loadPhotos() {
-        const result = await supabaseClient
-          .from("bucket_photos")
+      const result =
+        await supabaseClient
+          .from("summer_groups")
           .select("*")
-          .order("created_at", { ascending: false });
+          .order("created_at", {
+            ascending: false
+          });
 
-        if (result.error) {
-          console.error(result.error);
-          statusMessage.textContent = "Could not load photos.";
-          return;
-        }
 
-        photoGallery.innerHTML = "";
+      if (result.error) {
 
-        result.data.forEach(function (photo) {
-          const photoCard = document.createElement("div");
-          photoCard.className = "photo-card";
+        console.error(result.error);
 
-          const image = document.createElement("img");
-          image.src = photo.image_url;
-          image.alt = photo.caption || "Summer photo";
-          image.width = 300;
-          image.height = 200;
-            
-          const caption = document.createElement("p");
-          caption.textContent = photo.caption || "";
+        statusMessage.textContent =
+          "Could not load groups.";
 
-          photoCard.appendChild(image);
-          photoCard.appendChild(caption);
-
-          photoGallery.appendChild(photoCard);
-        });
+        return;
       }
 
-      loadPhotos();
-    </script>
-  </body>
+
+      groupGallery.innerHTML = "";
+
+
+      result.data.forEach(function (group) {
+
+        const groupCard =
+          document.createElement("div");
+
+        groupCard.className =
+          "group-card";
+
+
+        const title =
+          document.createElement("h3");
+
+        title.textContent =
+          group.name;
+
+
+        const description =
+          document.createElement("p");
+
+        description.textContent =
+          group.description || "";
+
+
+        const privacy =
+          document.createElement("p");
+
+        privacy.textContent =
+          group.is_public
+            ? "🌎 Public"
+            : "🔒 Private";
+
+
+        const openButton =
+          document.createElement("button");
+
+        openButton.textContent =
+          "Open Group";
+
+
+        openButton.onclick = function () {
+
+          window.location.href =
+            "group.html?id=" + group.id;
+
+        };
+
+
+        groupCard.appendChild(title);
+
+        groupCard.appendChild(description);
+
+        groupCard.appendChild(privacy);
+
+        groupCard.appendChild(openButton);
+
+
+        groupGallery.appendChild(groupCard);
+
+      });
+
+    }
+
+
+    loadGroups();
+
+  </script>
+
+</body>
+
 </html>
+```
