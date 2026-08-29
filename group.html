@@ -1,0 +1,430 @@
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Summer Group</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+
+<body>
+
+  <button onclick="window.location.href='bucket.html'">
+    ← Back to Groups
+  </button>
+
+
+  <h1 id="groupName">
+    Loading...
+  </h1>
+
+
+  <p id="groupDescription"></p>
+
+  <p id="groupPrivacy"></p>
+
+
+  <h2>Add a Summer Memory 📸</h2>
+
+
+  <input
+    id="photoInput"
+    type="file"
+    accept="image/*"
+  />
+
+
+  <input
+    id="captionInput"
+    type="text"
+    placeholder="Add a caption"
+  />
+
+
+  <button id="uploadButton">
+    Upload Photo
+  </button>
+
+
+  <p id="statusMessage"></p>
+
+
+  <h2>Summer Memories</h2>
+
+
+  <div id="photoGallery"></div>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://shazsdptrpegwihwqvif.supabase.co";
+
+
+    const SUPABASE_ANON_KEY =
+      "YOUR_EXISTING_SUPABASE_ANON_KEY";
+
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const groupId =
+      params.get("id");
+
+
+    const groupName =
+      document.getElementById(
+        "groupName"
+      );
+
+
+    const groupDescription =
+      document.getElementById(
+        "groupDescription"
+      );
+
+
+    const groupPrivacy =
+      document.getElementById(
+        "groupPrivacy"
+      );
+
+
+    const photoInput =
+      document.getElementById(
+        "photoInput"
+      );
+
+
+    const captionInput =
+      document.getElementById(
+        "captionInput"
+      );
+
+
+    const uploadButton =
+      document.getElementById(
+        "uploadButton"
+      );
+
+
+    const statusMessage =
+      document.getElementById(
+        "statusMessage"
+      );
+
+
+    const photoGallery =
+      document.getElementById(
+        "photoGallery"
+      );
+
+
+    async function loadGroup() {
+
+      const result =
+        await supabaseClient
+          .from("summer_groups")
+          .select("*")
+          .eq("id", groupId)
+          .single();
+
+
+      if (result.error) {
+
+        console.error(result.error);
+
+        statusMessage.textContent =
+          "Could not find this group.";
+
+        return;
+
+      }
+
+
+      groupName.textContent =
+        result.data.name;
+
+
+      groupDescription.textContent =
+        result.data.description || "";
+
+
+      groupPrivacy.textContent =
+        result.data.is_public
+          ? "🌎 Public group"
+          : "🔒 Private group";
+
+    }
+
+
+    uploadButton.addEventListener(
+      "click",
+      uploadPhoto
+    );
+
+
+    async function uploadPhoto() {
+
+      const file =
+        photoInput.files[0];
+
+
+      const caption =
+        captionInput.value;
+
+
+      if (!file) {
+
+        statusMessage.textContent =
+          "Please choose a photo first.";
+
+        return;
+
+      }
+
+
+      if (!file.type.startsWith("image/")) {
+
+        statusMessage.textContent =
+          "Please choose an image file.";
+
+        return;
+
+      }
+
+
+      statusMessage.textContent =
+        "Uploading photo...";
+
+
+      const fileExtension =
+        file.name.split(".").pop();
+
+
+      const fileName =
+        `${crypto.randomUUID()}.${fileExtension}`;
+
+
+      /*
+        IMPORTANT:
+        Each group gets its own folder
+        inside the existing
+        summer-photos bucket.
+      */
+
+      const filePath =
+        `${groupId}/${fileName}`;
+
+
+      const uploadResult =
+        await supabaseClient.storage
+
+          .from("summer-photos")
+
+          .upload(
+            filePath,
+            file,
+            {
+              contentType: file.type,
+
+              upsert: false
+            }
+          );
+
+
+      if (uploadResult.error) {
+
+        console.error(
+          uploadResult.error
+        );
+
+        statusMessage.textContent =
+          "Photo upload failed.";
+
+        return;
+
+      }
+
+
+      const urlResult =
+        supabaseClient.storage
+
+          .from("summer-photos")
+
+          .getPublicUrl(filePath);
+
+
+      const imageUrl =
+        urlResult.data.publicUrl;
+
+
+      const insertResult =
+        await supabaseClient
+
+          .from("bucket_photos")
+
+          .insert({
+
+            image_url:
+              imageUrl,
+
+            storage_path:
+              filePath,
+
+            caption:
+              caption,
+
+            group_id:
+              groupId
+
+          });
+
+
+      if (insertResult.error) {
+
+        console.error(
+          insertResult.error
+        );
+
+        statusMessage.textContent =
+          "Photo uploaded, but saving failed.";
+
+        return;
+
+      }
+
+
+      photoInput.value = "";
+
+      captionInput.value = "";
+
+      statusMessage.textContent =
+        "Photo uploaded! ☀️";
+
+
+      loadPhotos();
+
+    }
+
+
+    async function loadPhotos() {
+
+      const result =
+        await supabaseClient
+
+          .from("bucket_photos")
+
+          .select("*")
+
+          .eq("group_id", groupId)
+
+          .order(
+            "created_at",
+            {
+              ascending: false
+            }
+          );
+
+
+      if (result.error) {
+
+        console.error(
+          result.error
+        );
+
+        statusMessage.textContent =
+          "Could not load photos.";
+
+        return;
+
+      }
+
+
+      photoGallery.innerHTML = "";
+
+
+      result.data.forEach(
+        function(photo) {
+
+          const photoCard =
+            document.createElement(
+              "div"
+            );
+
+
+          photoCard.className =
+            "photo-card";
+
+
+          const image =
+            document.createElement(
+              "img"
+            );
+
+
+          image.src =
+            photo.image_url;
+
+
+          image.alt =
+            photo.caption ||
+            "Summer photo";
+
+
+          const caption =
+            document.createElement(
+              "p"
+            );
+
+
+          caption.textContent =
+            photo.caption || "";
+
+
+          photoCard.appendChild(
+            image
+          );
+
+
+          photoCard.appendChild(
+            caption
+          );
+
+
+          photoGallery.appendChild(
+            photoCard
+          );
+
+        }
+      );
+
+    }
+
+
+    loadGroup();
+
+    loadPhotos();
+
+  </script>
+
+</body>
+
+</html>
+```
