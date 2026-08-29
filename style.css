@@ -1,6 +1,6 @@
 body {
   background: #ffcbcb;
-  font-family: ;
+  font-family: "Birthstone", cursive;
   text-align: center;
 }
 
@@ -9,12 +9,6 @@ h1 {
   color: #fdffcd;
 }
 
-#birthstone-regular {
-  font-family: "Birthstone", cursive;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 80px;
-}
 
 #bucket {
   display: block;
