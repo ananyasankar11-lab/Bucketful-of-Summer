@@ -7,9 +7,12 @@ body {
 h1 {
   text-align: center;
   color: #fdffcd;
-  font-size: 200px
+  font-size: 80px
 }
 
+h2 {
+  font-size: 60px;
+}
 
 #bucket {
   display: block;
