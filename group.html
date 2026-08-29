@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Summer Bucket</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header>
+
+        <button onclick="history.back()">
+            ← Back
+        </button>
+
+        <h1 id="groupName">
+            Loading...
+        </h1>
+
+        <p id="visibility"></p>
+
+    </header>
+
+    <main>
+
+        <div class="upload-box">
+
+            <h2>Add Summer Memories </h2>
+
+            <input
+                id="photoInput"
+                type="file"
+                accept="image/*"
+                multiple
+            >
+
+            <button id="uploadBtn">
+                Upload Photos
+            </button>
+
+            <p id="message"></p>
+
+        </div>
+
+        <div
+            id="photos"
+            class="photo-grid"
+        ></div>
+
+    </main>
+
+    <script type="module" src="js/group.js"></script>
+
+</body>
+</html>
