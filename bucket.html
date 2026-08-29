@@ -1,147 +1,30 @@
-```html
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Bucketful of Summer</title>
 
-<head>
-  <title>Start Your Bucket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Birthstone&display=swap"
+      rel="stylesheet"
+    />
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-<body>
+  <body>
+    <h1 id="birthstone-regular">Bucketful of Summer</h1>
 
-  <h1>Start your bucket!</h1>
-
-  <p>Make a group for your summer memories 💗</p>
-
-  <button onclick="window.location.href='groups.html'">
-    Create a New Group
-  </button>
-
-  <h2>Your Summer Groups</h2>
-
-  <div id="groupGallery"></div>
-
-  <p id="statusMessage"></p>
-
-
-  <script>
-
-    const SUPABASE_URL =
-      "https://shazsdptrpegwihwqvif.supabase.co";
-
-    const SUPABASE_ANON_KEY =
-      "YOUR_EXISTING_SUPABASE_ANON_KEY";
-
-    const supabaseClient =
-      supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY
-      );
-
-
-    const groupGallery =
-      document.getElementById("groupGallery");
-
-    const statusMessage =
-      document.getElementById("statusMessage");
-
-
-    async function loadGroups() {
-
-      const result =
-        await supabaseClient
-          .from("summer_groups")
-          .select("*")
-          .order("created_at", {
-            ascending: false
-          });
-
-
-      if (result.error) {
-
-        console.error(result.error);
-
-        statusMessage.textContent =
-          "Could not load groups.";
-
-        return;
-      }
-
-
-      groupGallery.innerHTML = "";
-
-
-      result.data.forEach(function (group) {
-
-        const groupCard =
-          document.createElement("div");
-
-        groupCard.className =
-          "group-card";
-
-
-        const title =
-          document.createElement("h3");
-
-        title.textContent =
-          group.name;
-
-
-        const description =
-          document.createElement("p");
-
-        description.textContent =
-          group.description || "";
-
-
-        const privacy =
-          document.createElement("p");
-
-        privacy.textContent =
-          group.is_public
-            ? "🌎 Public"
-            : "🔒 Private";
-
-
-        const openButton =
-          document.createElement("button");
-
-        openButton.textContent =
-          "Open Group";
-
-
-        openButton.onclick = function () {
-
-          window.location.href =
-            "group.html?id=" + group.id;
-
-        };
-
-
-        groupCard.appendChild(title);
-
-        groupCard.appendChild(description);
-
-        groupCard.appendChild(privacy);
-
-        groupCard.appendChild(openButton);
-
-
-        groupGallery.appendChild(groupCard);
-
-      });
-
-    }
-
-
-    loadGroups();
-
-  </script>
-
-</body>
-
+    <a href="bucket.html">
+      <img
+        id="bucket"
+        src="download.png"
+        alt="bucket"
+        width="460"
+        height="345"
+      />
+    </a>
+  </body>
 </html>
-```
