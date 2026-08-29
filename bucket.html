@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Start Your Bucket</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+
+  <body>
+    <h1>Start your bucket!</h1>
+
+    <p>1. Upload your summer fun photos or your inspo pics</p>
+
+    <input id="photoInput" type="file" accept="image/*" />
+
+    <input
+      id="captionInput"
+      type="text"
+      placeholder="Add a caption"
+    />
+
+    <button id="uploadButton">Upload Photo</button>
+
+    <p id="statusMessage"></p>
+
+    <h2>Your Summer Photos</h2>
+
+    <div id="photoGallery"></div>
+
+    <script>
+      const SUPABASE_URL = "https://shazsdptrpegwihwqvif.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNoYXpzZHB0cnBlZ3dpaHdxdmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwMTg5NDQsImV4cCI6MjEwMzU5NDk0NH0.lpsslUxI-cb19MTU4fhh0E3AhictEX7RpY-RgQLH1NQ";
+
+      const supabaseClient = supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+      const photoInput = document.getElementById("photoInput");
+      const captionInput = document.getElementById("captionInput");
+      const uploadButton = document.getElementById("uploadButton");
+      const statusMessage = document.getElementById("statusMessage");
+      const photoGallery = document.getElementById("photoGallery");
+
+      uploadButton.addEventListener("click", uploadPhoto);
+
+      async function uploadPhoto() {
+        const file = photoInput.files[0];
+        const caption = captionInput.value;
+
+        if (!file) {
+          statusMessage.textContent = "Please choose a photo first.";
+          return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+          statusMessage.textContent = "Please choose an image file.";
+          return;
+        }
+
+        statusMessage.textContent = "Uploading photo...";
+
+        const fileExtension = file.name.split(".").pop();
+        const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+        const filePath = `summer/${fileName}`;
+
+        const uploadResult = await supabaseClient.storage
+          .from("summer-photos")
+          .upload(filePath, file, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (uploadResult.error) {
+          console.error(uploadResult.error);
+          statusMessage.textContent = "Photo upload failed.";
+          return;
+        }
+
+        const urlResult = supabaseClient.storage
+          .from("summer-photos")
+          .getPublicUrl(filePath);
+
+        const imageUrl = urlResult.data.publicUrl;
+
+        const insertResult = await supabaseClient
+          .from("bucket_photos")
+          .insert({
+            image_url: imageUrl,
+            storage_path: filePath,
+            caption: caption
+          });
+
+        if (insertResult.error) {
+          console.error(insertResult.error);
+          statusMessage.textContent = "Photo uploaded, but saving failed.";
+          return;
+        }
+
+        photoInput.value = "";
+        captionInput.value = "";
+        statusMessage.textContent = "Photo uploaded!";
+
+        loadPhotos();
+      }
+
+      async function loadPhotos() {
+        const result = await supabaseClient
+          .from("bucket_photos")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (result.error) {
+          console.error(result.error);
+          statusMessage.textContent = "Could not load photos.";
+          return;
+        }
+
+        photoGallery.innerHTML = "";
+
+        result.data.forEach(function (photo) {
+          const photoCard = document.createElement("div");
+          photoCard.className = "photo-card";
+
+          const image = document.createElement("img");
+          image.src = photo.image_url;
+          image.alt = photo.caption || "Summer photo";
+
+          const caption = document.createElement("p");
+          caption.textContent = photo.caption || "";
+
+          photoCard.appendChild(image);
+          photoCard.appendChild(caption);
+
+          photoGallery.appendChild(photoCard);
+        });
+      }
+
+      loadPhotos();
+    </script>
+  </body>
+</html>
