@@ -1,0 +1,188 @@
+```html
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Create a Summer Group</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+</head>
+
+
+<body>
+
+  <h1>Create Your Summer Group 🌸</h1>
+
+  <p>Make a special space for your memories!</p>
+
+
+  <input
+    id="groupName"
+    type="text"
+    placeholder="Group name"
+  />
+
+
+  <input
+    id="groupDescription"
+    type="text"
+    placeholder="What's this group about?"
+  />
+
+
+  <h3>Who can see your photos?</h3>
+
+
+  <label>
+
+    <input
+      type="radio"
+      name="privacy"
+      value="public"
+      checked
+    />
+
+    🌎 Public
+
+  </label>
+
+
+  <br />
+
+
+  <label>
+
+    <input
+      type="radio"
+      name="privacy"
+      value="private"
+    />
+
+    🔒 Private
+
+  </label>
+
+
+  <br /><br />
+
+
+  <button id="createButton">
+    Create Group
+  </button>
+
+
+  <button
+    onclick="window.location.href='bucket.html'"
+  >
+    Back
+  </button>
+
+
+  <p id="statusMessage"></p>
+
+
+  <script>
+
+    const SUPABASE_URL =
+      "https://shazsdptrpegwihwqvif.supabase.co";
+
+
+    const SUPABASE_ANON_KEY =
+      "YOUR_EXISTING_SUPABASE_ANON_KEY";
+
+
+    const supabaseClient =
+      supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY
+      );
+
+
+    const createButton =
+      document.getElementById("createButton");
+
+
+    createButton.addEventListener(
+      "click",
+      createGroup
+    );
+
+
+    async function createGroup() {
+
+      const name =
+        document.getElementById(
+          "groupName"
+        ).value.trim();
+
+
+      const description =
+        document.getElementById(
+          "groupDescription"
+        ).value.trim();
+
+
+      const privacy =
+        document.querySelector(
+          'input[name="privacy"]:checked'
+        ).value;
+
+
+      if (!name) {
+
+        document.getElementById(
+          "statusMessage"
+        ).textContent =
+          "Please give your group a name!";
+
+        return;
+
+      }
+
+
+      const result =
+        await supabaseClient
+          .from("summer_groups")
+          .insert({
+
+            name: name,
+
+            description: description,
+
+            is_public:
+              privacy === "public"
+
+          })
+          .select()
+          .single();
+
+
+      if (result.error) {
+
+        console.error(result.error);
+
+        document.getElementById(
+          "statusMessage"
+        ).textContent =
+          "Could not create group.";
+
+        return;
+
+      }
+
+
+      window.location.href =
+        "group.html?id=" + result.data.id;
+
+    }
+
+  </script>
+
+</body>
+
+</html>
+```
