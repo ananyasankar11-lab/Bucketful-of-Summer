@@ -160,19 +160,14 @@
           .single();
 
 
-      if (result.error) {
+     if (result.error) {
+  console.error("SUPABASE ERROR:", result.error);
 
-        console.error(result.error);
+  document.getElementById("statusMessage").textContent =
+    "Error: " + result.error.message;
 
-        document.getElementById(
-          "statusMessage"
-        ).textContent =
-          "Could not create group.";
-
-        return;
-
-      }
-
+  return;
+}
 
       window.location.href =
         "group.html?id=" + result.data.id;
